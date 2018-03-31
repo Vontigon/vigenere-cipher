@@ -5,6 +5,7 @@ Takes a message and encodes it using a specified key or
 takes an encoded message and decodes it using a specified key
 
 Use <-e key> to encrypt a message and <-d key> to decrypt a message (without the <>)
+Exit using ctrl+D
 
 Madison Gay
 """
