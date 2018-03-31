@@ -1,0 +1,209 @@
+"""
+VIGENERE CIPHER
+
+Takes a message and encodes it using a specified key or
+takes an encoded message and decodes it using a specified key
+
+Use <-e key> to encrypt a message and <-d key> to decrypt a message (without the <>)
+Exit by typing exit, Exit, or e.
+
+Madison Gay 3/26/2018
+"""
+import sys
+
+# --------------Error Messages----------------------------------------------------------
+#There isn't much you can do wrong here so the error handling is a tad lackluster, unfortunately
+def error(num):
+    if num == 1:
+        print("Key not specified.")
+    elif num == 2:
+        print("Invalid command.")
+    exit(0)
+
+# -------------Encryption Function------------------------------------------------------
+#Takes a plaintext message and encrypts it using a key
+def encrypt(plaintext, key):
+    P = list(plaintext) #Tokenizes the words of the message into characters
+    K = list(key)   #Tokenizes the words of the key into characters
+    plen = len(plaintext)
+    klen = len(key)
+    cipher = [None] * (plen-1)  #Initializes the list that will contain the encrypted message
+    mescount = 0    #Pointer for characters in plaintext message
+    kcount = 0  #Pointer for characters in the key
+    rescount = 0    #Pointer for characters in the encrypted message
+    while mescount < plen-1:
+        if alpha(P[mescount]) != 404:   #If a character is in the alphabet (uppercase or lowercase)
+            cipher[rescount] = beta((alpha(P[mescount]) + alpha(K[kcount])) % 26)   #Core of the cipher
+            #Keeps the case for the encrypted text
+            if P[mescount].isupper():
+                cipher[rescount] = cipher[rescount].upper()
+            else:
+                cipher[rescount] = cipher[rescount].lower()
+        else:
+                cipher[rescount] = P[mescount]  #If a character is NOT in the alphabet (numbers, spaces, punctuation, etc.)
+        if(alpha(P[mescount]) != 404):  #Only goes to next key character if it registered a letter in message
+            kcount += 1
+        if kcount == klen: #Loops the key
+            kcount = 0
+        mescount += 1
+        rescount += 1
+    return cipher
+
+# -------------Decryption Function-----------------------------------------------------
+#Takes an encrypted message and decrypts it using a key
+#Essentially the same as the encryption function with slightly different variable names
+def decrypt(ciphertext, key):
+    C = list(ciphertext)
+    K = list(key)
+    clen = len(ciphertext)
+    klen = len(key)
+    plain = [None] * (clen - 1)
+    mescount = 0
+    kcount = 0
+    rescount = 0
+    while mescount < clen - 1:
+        if alpha(C[mescount]) != 404:
+            plain[rescount] = beta((26 + alpha(C[mescount]) - alpha(K[kcount])) % 26)   #Main difference, change in calculation
+            if C[mescount].isupper():                                                   #Add 26 so the number is positive
+                plain[rescount] = plain[rescount].upper()
+            else:
+                plain[rescount] = plain[rescount].lower()
+        else:
+            plain[rescount] = C[mescount]
+        if (alpha(C[mescount]) != 404):
+            kcount += 1
+        if kcount == klen:
+            kcount = 0
+        mescount += 1
+        rescount += 1
+    return plain
+
+# -------------Alphabet Library-------------------------------------------------------
+#Takes a letter (uppercase or lower) and returns its number equivalent
+def alpha(x):
+    alphabet = {    #There's probably an easier way to do this but hey it works
+        'A' : 0,
+        'a' : 0,
+        'B' : 1,
+        'b' : 1,
+        'C' : 2,
+        'c' : 2,
+        'D' : 3,
+        'd' : 3,
+        'E' : 4,
+        'e' : 4,
+        'F' : 5,
+        'f' : 5,
+        'G' : 6,
+        'g' : 6,
+        'H' : 7,
+        'h' : 7,
+        'I' : 8,
+        'i' : 8,
+        'J' : 9,
+        'j' : 9,
+        'K' : 10,
+        'k' : 10,
+        'L' : 11,
+        'l' : 11,
+        'M' : 12,
+        'm' : 12,
+        'N' : 13,
+        'n' : 13,
+        'O' : 14,
+        'o' : 14,
+        'P' : 15,
+        'p' : 15,
+        'Q' : 16,
+        'q' : 16,
+        'R' : 17,
+        'r' : 17,
+        'S' : 18,
+        's' : 18,
+        'T' : 19,
+        't' : 19,
+        'U' : 20,
+        'u' : 20,
+        'V' : 21,
+        'v' : 21,
+        'W' : 22,
+        'w' : 22,
+        'X' : 23,
+        'x' : 23,
+        'Y' : 24,
+        'y' : 24,
+        'Z' : 25,
+        'z' : 25
+    }.get(x, 404)   #Returns 404 if x is not found within the dictionary
+
+    return alphabet
+
+# -------------Betabet Library--------------------------------------------------------
+#Takes a number and returns its letter equivalent
+def beta(x):
+    betabet = {     #I couldn't think of a better name so this is the betabet
+        0 : 'A',    #Although it only returns capital letters, it fixes it in post
+        1 : 'B',
+        2 : 'C',
+        3 : 'D',
+        4 : 'E',
+        5 : 'F',
+        6 : 'G',
+        7 : 'H',
+        8 : 'I',
+        9 : 'J',
+        10 : 'K',
+        11 : 'L',
+        12 : 'M',
+        13 : 'N',
+        14 : 'O',
+        15 : 'P',
+        16 : 'Q',
+        17 : 'R',
+        18 : 'S',
+        19 : 'T',
+        20 : 'U',
+        21 : 'V',
+        22 : 'W',
+        23 : 'X',
+        24 : 'Y',
+        25 : 'Z'
+    }.get(x, 404)   #Returns 404 if x isn't in the dictionary, but that shouldn't ever happen
+
+    return betabet
+
+# -------------MAIN--------_________--------------------------------------------------
+#Reads in the encryption (-e) or decryption (-d) command and specified key
+infile = sys.stdin
+text = infile.readline()    #Your standard "read stdin" commands, probably
+textlist = text.split() #Tokenizes the mess that is the user input and makes them into perfectly reasonable words
+if len(textlist) >= 2:
+    endec = textlist[0] #Keeps track of -e or -d
+    if endec != '-e' and endec != '-d':
+        error(2)
+    key = textlist[1]   #Initializes key to the second word of the input
+    for i in range(2, (len(textlist))): #Any words after -e or -d are part of the key
+        key = key + textlist[i] #Concatenates the string. As well, this takes care of any spaces
+        i += 1
+    key = key.replace('"', '')
+else:
+    if textlist[0] == '-d' or textlist[0] == '-e':
+        error(1)
+    else:
+        error(2)
+while True: #Loops so you can encrypt or decrypt with the same key multiple times (action specified earlier, can't change)
+    print("Type in your message: ")
+    infile = sys.stdin  #Reads in the message
+    text = infile.readline()
+    textlist = text.split()
+    if textlist[0] == 'Exit' or textlist[0] == 'exit' or textlist[0] == 'e':    #Current break requirements, change for linux to ^D somehow
+        break
+    if endec == '-d':   #Checks for decryption
+        result = decrypt(text, key)
+        for i in range(len(text)-1):
+            sys.stdout.write(result[i]) #sys.stdout.write used instead of print to remove newline every time
+    else:
+        result = encrypt(text, key) #Checks for encryption
+        for i in range(len(text)-1):
+            sys.stdout.write(result[i])
+    print()
